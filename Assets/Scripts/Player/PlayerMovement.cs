@@ -18,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
     private float _mouseSensetive;
 
     [SerializeField]
+    private Transform _cameraCenter;
+
+    [SerializeField]
     private Animator _animator;
     [SerializeField]
     private Transform _modelTransform;
@@ -28,8 +31,9 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody _rb;
     private Vector3 _moveVector;
-    private float _prevMousePositionX;
+    private Vector3 _prevMousePosition;
     private float _eulerY;
+    private float _eulerX;
     private bool _grounded;
     
     private float _freezeSeconds;
@@ -42,49 +46,15 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
 
-        if (_freezeSeconds > 0)
+        if (_freezeSeconds > 0 || Time.deltaTime == 0)
         {
             _freezeSeconds -= Time.deltaTime;
-            _prevMousePositionX = Input.mousePosition.x;
+            _prevMousePosition = Input.mousePosition;
             return;
         }
 
-        _moveVector.x = Input.GetAxis("Horizontal");
-        _moveVector.z = Input.GetAxis("Vertical");
-
-        _animator.SetFloat("Speed", _moveVector.sqrMagnitude);
-
-        if (_moveVector.sqrMagnitude > 0)
-        {
-            Vector3 direction = transform.TransformDirection(_moveVector);
-            direction.Normalize();
-
-            Vector3 modelRoration = Vector3.zero;
-
-            if (_moveVector.x > 0) {
-                modelRoration = new Vector3(0, _moveVector.z > 0 ? 45f : _moveVector.z < 0 ? 135f : 90f, 0);
-            } else if (_moveVector.x < 0) {
-                modelRoration = new Vector3(0, _moveVector.z > 0 ? -45f : _moveVector.z < 0 ? -135f : -90f, 0);
-            } else {
-                modelRoration = new Vector3(0, _moveVector.z > 0 ? 0 : -180f, 0);
-            }
-
-            _modelTransform.localRotation = Quaternion.Lerp(_modelTransform.localRotation, Quaternion.Euler(modelRoration), Time.deltaTime * _rotationSpeed);
-
-            _rb.velocity = new Vector3(direction.x * _speed, _rb.velocity.y, direction.z * _speed);
-
-        } else
-        {
-            _rb.velocity = new Vector3(0, _rb.velocity.y, 0);
-            _modelTransform.localRotation = Quaternion.Lerp(_modelTransform.localRotation, Quaternion.Euler(Vector3.zero), Time.deltaTime * _rotationSpeed);
-        }
-
-
-        //Camera rotate
-        float deltaX = (Input.mousePosition.x - _prevMousePositionX) * _mouseSensetive;
-        _prevMousePositionX = Input.mousePosition.x;
-        _eulerY += deltaX;
-        transform.eulerAngles = new Vector3(0, _eulerY, 0);
+        CameraRotate();
+        PlayerMove();
 
         if (_grounded != _groundChecker.Grounded())
         {
@@ -101,12 +71,12 @@ public class PlayerMovement : MonoBehaviour
             
         }
 
-        if(Input.GetMouseButtonDown(0) && _grounded)
+        if(Input.GetKeyDown(KeyCode.Mouse0) && _grounded)
         {
             _animator.SetTrigger("Attack");
             _freezeSeconds = 1f;
             _attackCollider.enabled = true;
-            StartCoroutine(disableAffterTime());
+            StartCoroutine(disableAttackTrigger());
             _rb.velocity = new Vector3(0, _rb.velocity.y, 0);
         }
 
@@ -118,7 +88,57 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    IEnumerator disableAffterTime()
+    private void PlayerMove()
+    {
+        _moveVector.x = Input.GetAxis("Horizontal");
+        _moveVector.z = Input.GetAxis("Vertical");
+
+        _animator.SetFloat("Speed", _moveVector.sqrMagnitude);
+
+        if (_moveVector.sqrMagnitude > 0)
+        {
+            Vector3 direction = transform.TransformDirection(_moveVector);
+            direction.Normalize();
+
+            Vector3 modelRoration = Vector3.zero;
+
+            if (_moveVector.x > 0)
+            {
+                modelRoration = new Vector3(0, _moveVector.z > 0 ? 45f : _moveVector.z < 0 ? 135f : 90f, 0);
+            }
+            else if (_moveVector.x < 0)
+            {
+                modelRoration = new Vector3(0, _moveVector.z > 0 ? -45f : _moveVector.z < 0 ? -135f : -90f, 0);
+            }
+            else
+            {
+                modelRoration = new Vector3(0, _moveVector.z > 0 ? 0 : -180f, 0);
+            }
+
+            _modelTransform.localRotation = Quaternion.Lerp(_modelTransform.localRotation, Quaternion.Euler(modelRoration), Time.deltaTime * _rotationSpeed);
+
+            _rb.velocity = new Vector3(direction.x * _speed, _rb.velocity.y, direction.z * _speed);
+
+        }
+        else
+        {
+            _rb.velocity = new Vector3(0, _rb.velocity.y, 0);
+            _modelTransform.localRotation = Quaternion.Lerp(_modelTransform.localRotation, Quaternion.Euler(Vector3.zero), Time.deltaTime * _rotationSpeed);
+        }
+    }
+
+    private void CameraRotate()
+    {
+        float deltaX = (Input.mousePosition.x - _prevMousePosition.x) * _mouseSensetive;
+        float deltaY = (Input.mousePosition.y - _prevMousePosition.y) * _mouseSensetive * -1;
+        _prevMousePosition = Input.mousePosition;
+        _eulerY += deltaX;
+        _eulerX = Mathf.Clamp(_eulerX + deltaY, -35f, 25f);
+        transform.eulerAngles = new Vector3(0, _eulerY, 0);
+        _cameraCenter.localEulerAngles = new Vector3(_eulerX, 0f, 0f);
+    }
+
+    IEnumerator disableAttackTrigger()
     {
         yield return new WaitForSeconds(0.5f);
         _attackCollider.enabled = false;
