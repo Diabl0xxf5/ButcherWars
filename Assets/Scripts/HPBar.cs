@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class HPBar : MonoBehaviour
 {
-    
+
     [SerializeField]
     Image _hpBarImage;
 
@@ -15,6 +15,9 @@ public class HPBar : MonoBehaviour
 
     [SerializeField]
     TextMeshProUGUI _hpText;
+
+    [SerializeField]
+    Transform _camera;
 
     public void UpdateView(int new_hp, int max_hp)
     {
@@ -27,6 +30,14 @@ public class HPBar : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         _hpBarPrevImage.fillAmount = _hpBarImage.fillAmount;
+    }
+
+    void FixedUpdate()
+    {
+        if (_camera)
+        {
+            transform.LookAt(_camera);
+        }
     }
 
 }
