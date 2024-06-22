@@ -17,17 +17,29 @@ public class Hook : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!activeHooking) return;
-
+        
         if (other.tag.Equals("Bot"))
         {
             grappling.SetState(HookState.Compression);
-            other.gameObject.transform.parent.parent = transform;
-            other.gameObject.GetComponentInParent<Rigidbody>().isKinematic = true;
+            GameObject botGO = other.gameObject.transform.parent.gameObject;
+
+            botGO.transform.parent = transform;
+            botGO.transform.localPosition = new Vector3(botGO.transform.localPosition.x, -0.2f ,botGO.transform.localPosition.z);
+            botGO.GetComponent<Rigidbody>().isKinematic = true;
             activeHooking = false;
         } else if (other.tag.Equals("Pillar"))
         {
             grappling.SetState(HookState.Àttraction);
             activeHooking = false;
+        } else if (other.tag.Equals("Prop"))
+        {
+            grappling.SetState(HookState.Compression);
+            activeHooking = false;
+        } else if (other.tag.Equals("Ground"))
+        {
+            grappling.SetState(HookState.Compression);
+            activeHooking = false;
+            //grappling.GrappleForwardBounce();
         }
     }
     

@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _boostAnim: {fileID: 4440000497148799992}
-  _jumpForce: 10
+  _jumpForce: 12
 --- !u!1 &4074813984219522512
 GameObject:
   m_ObjectHideFlags: 0
@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 2736523445153463165}
   m_Layer: 0
   m_Name: Booster
-  m_TagString: Untagged
+  m_TagString: Prop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -88,8 +88,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.9278312, y: 1, z: 4.9981294}
-  m_Center: {x: -0.4639156, y: 0, z: -1.9990647}
+  m_Size: {x: 1.9278312, y: 2.407931, z: 4.9981294}
+  m_Center: {x: -0.4639156, y: -0.703966, z: -1.9990647}
 --- !u!1 &9069512018116835260
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 3575142616090981058}
   m_Layer: 0
   m_Name: Bridge_A
-  m_TagString: Untagged
+  m_TagString: Prop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

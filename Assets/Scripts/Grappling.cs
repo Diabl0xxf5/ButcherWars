@@ -20,6 +20,7 @@ public class Grappling : MonoBehaviour
 
     [Header("Settings")]
     public float maxGrappleDistance;
+    public float minGrappleDistance;
     public int quality;
     public float speed;
 
@@ -28,7 +29,7 @@ public class Grappling : MonoBehaviour
     public GameObject originalHook;
     public Hook hook;
 
-    private Vector3 camera_forward;
+    private Vector3 grapple_forward;
     private Vector3 start_grapple_position;
     private Vector3 end_grapple_position;
     private LineRenderer lr;
@@ -87,7 +88,7 @@ public class Grappling : MonoBehaviour
         {
             SetState(HookState.Compression);
         }
-        else if ((hookState == HookState.Compression || hookState == HookState.Аttraction) && currentDistance <= 1f)
+        else if ((hookState == HookState.Compression || hookState == HookState.Аttraction) && currentDistance <= minGrappleDistance)
         {
             SetState(HookState.None);
             return;
@@ -95,7 +96,7 @@ public class Grappling : MonoBehaviour
 
         if (hookState == HookState.Expansion)
         {
-            end_grapple_position += camera_forward * Time.deltaTime * speed;
+            end_grapple_position += grapple_forward * Time.deltaTime * speed;
             lr.SetPosition(quality - 1, end_grapple_position);
 
             hookGO.transform.position = end_grapple_position;
@@ -136,6 +137,11 @@ public class Grappling : MonoBehaviour
         {
             player.GetComponent<Rigidbody>().isKinematic = true;
         }
+
+    }
+
+    public void GrappleForwardBounce()
+    {
 
     }
 
@@ -188,6 +194,7 @@ public class Grappling : MonoBehaviour
 
         hookGO.SetActive(true);
         hookGO.transform.parent = null;
+        hookGO.transform.LookAt(start_grapple_position + _camera.forward);
 
         originalHook.SetActive(false);
         lr.enabled = true;
@@ -196,11 +203,11 @@ public class Grappling : MonoBehaviour
 
         currentDistance = 0;
 
-        camera_forward = _camera.forward;
-        camera_forward.y = 0;
-        camera_forward.Normalize();
+        grapple_forward = _camera.forward;
+        //camera_forward.y = 0;
+        grapple_forward.Normalize();
 
-        float cos_camera = Mathf.Abs(camera_forward.x / camera_forward.magnitude);
+        float cos_camera = Mathf.Abs(grapple_forward.x / grapple_forward.magnitude);
         drawline = (cos_camera < 0.48f || cos_camera > 0.87f); // от 30 до 60 градусов включается отрисовка по диагонали, иначе линейная
     }
 

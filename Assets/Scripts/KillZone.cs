@@ -4,14 +4,21 @@ using UnityEngine;
 
 public class KillZone : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+
+    private void OnCollisionEnter(Collision collision)
     {
-        Health hp = other.GetComponentInParent<Health>();
-        if (hp) {
-            hp.Kill();
-        } else
+        if (collision.collider.tag.Equals("Hook")) return;
+
+
+        Health hp = collision.collider.GetComponentInParent<Health>();
+        if (hp)
         {
-            Destroy(other.gameObject);
+            hp.Kill();
+        }
+        else
+        {
+            Destroy(collision.collider.gameObject);
         }
     }
+
 }

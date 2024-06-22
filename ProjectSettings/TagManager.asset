@@ -7,6 +7,8 @@ TagManager:
   - Ground
   - Bot
   - Pillar
+  - Prop
+  - Hook
   layers:
   - Default
   - TransparentFX

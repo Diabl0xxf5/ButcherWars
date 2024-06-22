@@ -6,7 +6,7 @@ public class Attack : MonoBehaviour
 {
 
     [SerializeField]
-    int damage;
+    public int damage;
 
     [SerializeField]
     int pushForce;

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2241783440142846165}
   m_Layer: 0
   m_Name: Ground_B1
-  m_TagString: Untagged
+  m_TagString: Prop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 2291409354185702935}
   m_Layer: 0
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
