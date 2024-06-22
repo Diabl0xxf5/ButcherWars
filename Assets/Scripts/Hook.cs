@@ -14,11 +14,6 @@ public class Hook : MonoBehaviour
         grappling = GetComponentInParent<Grappling>();
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        bool test = true;
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (!activeHooking) return;

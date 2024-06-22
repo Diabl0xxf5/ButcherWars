@@ -8,6 +8,9 @@ public class Attack : MonoBehaviour
     [SerializeField]
     int damage;
 
+    [SerializeField]
+    int pushForce;
+
     private void OnTriggerEnter(Collider other)
     {
         Health health = other.GetComponentInParent<Health>();
@@ -16,6 +19,13 @@ public class Attack : MonoBehaviour
         {
             health.Damage(damage);
         }
+
+        Rigidbody other_rb = other.GetComponentInParent<Rigidbody>();
+        if (other_rb)
+        {
+            other_rb.AddForce((other.transform.position - transform.position) * pushForce, ForceMode.Impulse);
+        }
+        
     }
 
 }
