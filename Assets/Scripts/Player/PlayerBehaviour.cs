@@ -5,22 +5,22 @@ using UnityEngine;
 public class PlayerBehaviour : MonoBehaviour
 {
 
-    [SerializeField] PlayerMovement _playerMove;
+    [SerializeField] PlayerControl _playerControl;
     [SerializeField] Animator _animator;
 
     public void Play()
     {
-        if (_playerMove)
+        if (_playerControl)
         {
-            _playerMove.enabled = true;
+            _playerControl.enabled = true;
         }
     }
 
     public void Stop()
     {
-        if (_playerMove)
+        if (_playerControl)
         {
-            _playerMove.enabled = false;
+            _playerControl.enabled = false;
         }     
     }
 

@@ -65,9 +65,9 @@ public class Grappling : MonoBehaviour
         }
     }
 
-    void Update()
+    public void LaunchGrapple()
     {
-        if (hookState == HookState.None && Input.GetMouseButtonDown(1))
+        if (hookState == HookState.None)
         {
             SetState(HookState.Expansion);
         }
@@ -192,9 +192,11 @@ public class Grappling : MonoBehaviour
         start_grapple_position = transform.position;
         end_grapple_position = start_grapple_position;
 
+        grapple_forward = _camera.forward;
+
         hookGO.SetActive(true);
         hookGO.transform.parent = null;
-        hookGO.transform.LookAt(start_grapple_position + _camera.forward);
+        hookGO.transform.LookAt(start_grapple_position + grapple_forward);
 
         originalHook.SetActive(false);
         lr.enabled = true;
@@ -202,10 +204,6 @@ public class Grappling : MonoBehaviour
         lr.SetPosition(0, start_grapple_position);
 
         currentDistance = 0;
-
-        grapple_forward = _camera.forward;
-        //camera_forward.y = 0;
-        grapple_forward.Normalize();
 
         float cos_camera = Mathf.Abs(grapple_forward.x / grapple_forward.magnitude);
         drawline = (cos_camera < 0.48f || cos_camera > 0.87f); // от 30 до 60 градусов включается отрисовка по диагонали, иначе линейная
@@ -226,5 +224,5 @@ public class Grappling : MonoBehaviour
 
         player.GetComponent<Rigidbody>().isKinematic = false;
     }
-
+   
 }
