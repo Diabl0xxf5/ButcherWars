@@ -4,9 +4,24 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+    [Header("References")]
+    public PlayerControl _playerControl;
+    public Animator _animator;
 
-    [SerializeField] PlayerControl _playerControl;
-    [SerializeField] Animator _animator;
+    public Transform _spawnPoint;
+    public Teams _team;
+
+    private void Start()
+    {
+        GameManager.instance.FillPlayerBehaviour(this);
+        transform.position = _spawnPoint.position;
+        transform.rotation = _spawnPoint.rotation;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.ResetSlot(this);
+    }
 
     public void Play()
     {

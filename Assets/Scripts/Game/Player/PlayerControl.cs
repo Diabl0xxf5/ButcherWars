@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class PlayerControl : MonoBehaviour
     public Rigidbody _rb;
     public Attack _attack;
     public Grappling _grappling;
+    public PhotonView _pview;
+    public Camera _camera;
 
     [Header("Settings")]
     public float _rotationSpeed;
@@ -39,8 +42,14 @@ public class PlayerControl : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
     }
 
+    void Start()
+    {
+        _camera.enabled = _pview.IsMine;
+    }
+
     void Update()
     {
+        if (!_pview.IsMine) return;
 
         if (_freezeControlTimer > 0 || Time.deltaTime == 0)
         {
@@ -61,7 +70,7 @@ public class PlayerControl : MonoBehaviour
 
     private void StateJump()
     {
-        if (Input.GetKeyDown(_JumpKey) && _groundChecker.Grounded())
+        if (InputButtonCheck(_JumpKey) && _groundChecker.Grounded())
         {
             _animator.SetTrigger("Jump");
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
@@ -70,7 +79,7 @@ public class PlayerControl : MonoBehaviour
 
     private void StateGrappling()
     {
-        if (Input.GetKeyDown(_GrappleKey))
+        if (InputButtonCheck(_GrappleKey))
         {
             ModelLookAtCamera();
             _grappling.LaunchGrapple();
@@ -79,7 +88,7 @@ public class PlayerControl : MonoBehaviour
 
     private void StateAttack()
     {
-        if (Input.GetKeyDown(_AttackKey) && _grounded)
+        if (InputButtonCheck(_AttackKey) && _grounded)
         {
             ModelLookAtCamera();
             _animator.SetTrigger("Attack");
@@ -128,7 +137,10 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
-
+    private bool InputButtonCheck(KeyCode kc)
+    {
+        return Input.GetKeyDown(kc);
+    }
     private void ModelLookAtCamera()
     {
         Vector3 camera_direction = _cameraCenter.forward;

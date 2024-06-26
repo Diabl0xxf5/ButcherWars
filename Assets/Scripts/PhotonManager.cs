@@ -5,20 +5,25 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 
 
-public class PhotonManager :MonoBehaviourPunCallbacks
+public class PhotonManager : MonoBehaviourPunCallbacks
 {
 
     [SerializeField] string region;
 
     public static UnityEvent<List<RoomInfo>> _OnRoomListUpdate = new UnityEvent<List<RoomInfo>>();
+    public static UnityEvent<string, string> _OnGetMessage = new UnityEvent<string, string>();
 
     public static PhotonManager instance;
+    public static PhotonView _pview;
+
+    private GameObject player;
 
     void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            _pview = gameObject.AddComponent<PhotonView>();
         }
         else
         {
@@ -28,6 +33,7 @@ public class PhotonManager :MonoBehaviourPunCallbacks
 
         transform.parent = null;
         DontDestroyOnLoad(this);
+        
     }
 
     void Start()
@@ -44,11 +50,7 @@ public class PhotonManager :MonoBehaviourPunCallbacks
     public void CreateRoom(string roomName)
     {
         CheckConnectionStatus();
-        
-        if (PhotonNetwork.CreateRoom(roomName, DefaultRoomOptions()))
-        {
-            PhotonNetwork.LoadLevel("ButcherWars");
-        }
+        PhotonNetwork.CreateRoom(roomName, DefaultRoomOptions());
     }
 
     public void JoinRoom(string roomName)
@@ -65,9 +67,19 @@ public class PhotonManager :MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom)
             PhotonNetwork.LeaveRoom();
-
-        PhotonNetwork.LoadLevel("MainMenu");
     }
+
+    public void SendMessage(string nick, string message)
+    {
+        _pview.RPC("onGetMessage", RpcTarget.All, nick, message);
+    }
+
+    public void SpawnPlayer(GameObject go)
+    {
+        player = PhotonNetwork.Instantiate(go.name, Vector3.zero, Quaternion.identity);
+    }
+
+// приват
 
     private void CheckConnectionStatus()
     {
@@ -81,6 +93,8 @@ public class PhotonManager :MonoBehaviourPunCallbacks
         roomOptions.MaxPlayers = 6;
         return roomOptions;
     }
+
+//колбэки
 
     public override void OnConnectedToMaster()
     {
@@ -114,9 +128,22 @@ public class PhotonManager :MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel("ButcherWars");
     }
 
+    public override void OnLeftRoom()
+    {
+        Debug.Log($"Отключились от комнаты");
+        PhotonNetwork.Destroy(player);
+        PhotonNetwork.LoadLevel("MainMenu");
+    }
+
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError($"Ошибка подключения к комнате. По причине {returnCode}:{message}");
+    }
+
+    [PunRPC]
+    private void onGetMessage(string nick, string message)
+    {
+        _OnGetMessage.Invoke(nick, message);
     }
 
 }
