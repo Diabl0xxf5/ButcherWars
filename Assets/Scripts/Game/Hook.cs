@@ -18,7 +18,7 @@ public class Hook : MonoBehaviour
     {
         if (!activeHooking) return;
         
-        if (other.tag.Equals("Bot"))
+        if (other.tag.Equals("Bot") || other.tag.Equals("Player"))
         {
             grappling.SetState(HookState.Compression);
             GameObject botGO = other.gameObject.transform.parent.gameObject;

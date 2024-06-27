@@ -7,7 +7,9 @@ public class Health : MonoBehaviour
 {
 
     [SerializeField]
-    HPBar _hpBar;
+    public HPBar _InGameHood;
+    [SerializeField]
+    public HPBar _InWorld;
 
     [SerializeField]
     public int _hp = 100;
@@ -29,7 +31,8 @@ public class Health : MonoBehaviour
         if (_hp == 0) return;
 
         _hp -= Mathf.Min(_hp, value);
-        _hpBar.UpdateView(_hp, _max);
+        _InGameHood.UpdateView(_hp, _max);
+        _InWorld.UpdateView(_hp, _max);
 
         if (_anim)
         {
@@ -60,7 +63,8 @@ public class Health : MonoBehaviour
     public void Heal(int value)
     {
         _hp = Mathf.Min(_hp + value, _max);
-        _hpBar.UpdateView(_hp, _max);
+        _InGameHood.UpdateView(_hp, _max);
+        _InWorld.UpdateView(_hp, _max);
     }
 
     void Start()

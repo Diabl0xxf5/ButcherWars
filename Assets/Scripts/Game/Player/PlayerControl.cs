@@ -15,6 +15,8 @@ public class PlayerControl : MonoBehaviour
     public Grappling _grappling;
     public PhotonView _pview;
     public Camera _camera;
+    public Canvas _inGameHood;
+    public Canvas _HP_Canvas;
 
     [Header("Settings")]
     public float _rotationSpeed;
@@ -45,6 +47,8 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         _camera.enabled = _pview.IsMine;
+        _inGameHood.enabled = _pview.IsMine;
+        _HP_Canvas.enabled = !_pview.IsMine;
     }
 
     void Update()
