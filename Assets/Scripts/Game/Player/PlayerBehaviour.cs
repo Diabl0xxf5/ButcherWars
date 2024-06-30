@@ -1,21 +1,23 @@
+using Photon.Pun;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
     [Header("References")]
     public PlayerControl _playerControl;
-    public Animator _animator;
+    public NetworkedAnimation _nwAnimator;
+    public InGameMenu _inGameMenu;
+    public PhotonView _pview;
 
     public Transform _spawnPoint;
     public Teams _team;
+    public bool died;
 
     private void Start()
     {
         GameManager.instance.FillPlayerBehaviour(this);
-        transform.position = _spawnPoint.position;
-        transform.rotation = _spawnPoint.rotation;
+        Respawn();
     }
 
     private void OnDestroy()
@@ -41,16 +43,29 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void TakeDamage()
     {
-        _animator.SetTrigger("Punch");
+        _nwAnimator.SetTrigger("Punch");
         Stop();
         StartCoroutine(PlayContinious());
     }
 
     public void Die()
     {
-        _animator.SetTrigger("Die");
+        _nwAnimator.SetTrigger("Die");
         Stop();
+        died = true;
+        if (_pview.IsMine) _inGameMenu.Show();
     }
+
+    public void Respawn()
+    {
+        transform.position = _spawnPoint.position;
+        transform.rotation = _spawnPoint.rotation;
+        GetComponent<Health>().FullHeal();
+        Play();
+        died = false;
+    }
+
+
 
     IEnumerator PlayContinious()
     {

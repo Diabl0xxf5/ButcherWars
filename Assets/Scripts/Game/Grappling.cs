@@ -1,7 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public enum HookState
 {
@@ -12,7 +12,7 @@ public enum HookState
 }
 
 
-public class Grappling : MonoBehaviour
+public class Grappling : MonoBehaviourPunCallbacks
 {
     [Header("References")]
     public Transform _camera;
@@ -39,18 +39,56 @@ public class Grappling : MonoBehaviour
     private float[] LineCoefs;
     private bool drawline;
     public HookState hookState;
-    
+
+    PhotonView pv;
 
     void OnValidate()
     {
         FillSinCoefs();
     }
 
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+    }
+
     void Awake()
     {
+        pv = GetComponent<PhotonView>();
         lr = GetComponent<LineRenderer>();
         SetState(HookState.None);
         FillSinCoefs();
+    }
+
+    private void OnEvent(EventData photonEvent)
+    {
+        byte eventCode = photonEvent.Code;
+        if (eventCode == PhotonManager.StartGrapplingEventCode)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            int targetPhotonView = (int)data[0];
+            if (targetPhotonView == this.photonView.ViewID)
+            {
+                hookState = HookState.Expansion;
+                StartGrapple((Vector3)data[1], (Vector3)data[2]);
+            }
+        }
+        else if (eventCode == PhotonManager.StopGrapplingEventCode)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            int targetPhotonView = (int)data[0];
+            if (targetPhotonView == this.photonView.ViewID)
+            {
+                StopGrapple();
+            }
+        }
     }
 
     void FillSinCoefs()
@@ -127,7 +165,7 @@ public class Grappling : MonoBehaviour
 
         if (hookState == HookState.Expansion)
         {
-            StartGrapple();
+            StartGrapple(transform.position, _camera.forward);
         }
         else if (hookState == HookState.None)
         {
@@ -185,14 +223,13 @@ public class Grappling : MonoBehaviour
         }
     }
 
-    void StartGrapple()
+    void StartGrapple(Vector3 _start_grapple_position, Vector3 _grapple_forward)
     {
         hook.activeHooking = true;
 
-        start_grapple_position = transform.position;
+        start_grapple_position = _start_grapple_position;
         end_grapple_position = start_grapple_position;
-
-        grapple_forward = _camera.forward;
+        grapple_forward = _grapple_forward;
 
         hookGO.SetActive(true);
         hookGO.transform.parent = null;
@@ -207,6 +244,8 @@ public class Grappling : MonoBehaviour
 
         float cos_camera = Mathf.Abs(grapple_forward.x / grapple_forward.magnitude);
         drawline = (cos_camera < 0.48f || cos_camera > 0.87f); // от 30 до 60 градусов включается отрисовка по диагонали, иначе линейная
+
+        if (pv.IsMine) PhotonManager.SendStartEvent(pv.ViewID, _start_grapple_position, _grapple_forward);
     }
 
     void StopGrapple()
@@ -223,6 +262,8 @@ public class Grappling : MonoBehaviour
         lr.positionCount = 0;
 
         player.GetComponent<Rigidbody>().isKinematic = false;
+
+        if (pv.IsMine) PhotonManager.SendStopEvent(pv.ViewID);
     }
    
 }

@@ -33,6 +33,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        Spawn();
+    }
+
+    public void Spawn()
+    {
         if (PhotonManager.instance)
             PhotonManager.instance.SpawnPlayer(_playerPrefab);
         else

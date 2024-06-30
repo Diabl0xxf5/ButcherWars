@@ -1,4 +1,5 @@
 using Photon.Realtime;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -30,6 +31,8 @@ public class Menu : MonoBehaviour
         _createB.onClick.AddListener(call: (() => { PhotonManager.instance.CreateRoom(_roomNameIF.text); }));
 
         PhotonManager._OnRoomListUpdate.AddListener(OnRoomListUpdate);
+
+        StartCoroutine(Reconnector());
     }
 
     private void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -46,6 +49,15 @@ public class Menu : MonoBehaviour
         _mainMenuPanel.SetActive(false);
         _lobbyPanel.SetActive(true);
         PhotonManager.instance.Connect();
+    }
+
+    IEnumerator Reconnector()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(0.5f);
+            PhotonManager.instance.CheckConnectionStatus();
+        }
     }
 
 }

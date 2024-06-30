@@ -7,7 +7,7 @@ public class PlayerControl : MonoBehaviour
 {
     [Header("References")]
     public Transform _cameraCenter;
-    public Animator _animator;
+    public NetworkedAnimation _nwAnimator;
     public Transform _modelTransform;
     public GroundChecker _groundChecker;
     public Rigidbody _rb;
@@ -17,6 +17,7 @@ public class PlayerControl : MonoBehaviour
     public Camera _camera;
     public Canvas _inGameHood;
     public Canvas _HP_Canvas;
+    public InGameMenu _inGameMenu;
 
     [Header("Settings")]
     public float _rotationSpeed;
@@ -31,6 +32,7 @@ public class PlayerControl : MonoBehaviour
     public KeyCode _AttackKey;
     public KeyCode _GrappleKey;
     public KeyCode _JumpKey;
+    public KeyCode _MenuButton;
 
     private Vector3 _moveVector;
     private Vector3 _prevMousePosition;
@@ -38,6 +40,7 @@ public class PlayerControl : MonoBehaviour
     private float _eulerX;
     private bool _grounded;
     private float _freezeControlTimer;
+    private bool _running;
 
     void Awake()
     {
@@ -57,7 +60,7 @@ public class PlayerControl : MonoBehaviour
 
         if (_freezeControlTimer > 0 || Time.deltaTime == 0)
         {
-            _freezeControlTimer -= Time.deltaTime;
+            _freezeControlTimer -= Time.deltaTime; 
             _prevMousePosition = Input.mousePosition;
             return;
         }
@@ -70,13 +73,14 @@ public class PlayerControl : MonoBehaviour
         StateGrappling();
         StateJump();
 
+        if (InputButtonCheck(_MenuButton)) _inGameMenu.ShowHide();
+
     }
 
     private void StateJump()
     {
         if (InputButtonCheck(_JumpKey) && _groundChecker.Grounded())
         {
-            _animator.SetTrigger("Jump");
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
         }
     }
@@ -95,7 +99,7 @@ public class PlayerControl : MonoBehaviour
         if (InputButtonCheck(_AttackKey) && _grounded)
         {
             ModelLookAtCamera();
-            _animator.SetTrigger("Attack");
+            _nwAnimator.SetTrigger("Attack");
             _freezeControlTimer = _freezeControl;
             _rb.velocity = new Vector3(0, _rb.velocity.y, 0);
             _attack.StartAttack(_damage, _pushForce);
@@ -107,7 +111,7 @@ public class PlayerControl : MonoBehaviour
         _moveVector.x = Input.GetAxis("Horizontal");
         _moveVector.z = Input.GetAxis("Vertical");
 
-        _animator.SetFloat("Speed", _moveVector.sqrMagnitude);
+        UpdateAnimationRun(_moveVector.sqrMagnitude);
 
         if (_moveVector.sqrMagnitude > 0)
         {
@@ -141,6 +145,20 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
+    private void UpdateAnimationRun(float sqrSpeed)
+    {
+        if (sqrSpeed >= 0.01f && !_running)
+        {
+            _running = true;
+            _nwAnimator.SetBool("Running", _running);
+        } else if (sqrSpeed < 0.01f && _running)
+        {
+            _running = false;
+            _nwAnimator.SetBool("Running", _running);
+        }
+        
+    }
+
     private bool InputButtonCheck(KeyCode kc)
     {
         return Input.GetKeyDown(kc);
@@ -169,12 +187,12 @@ public class PlayerControl : MonoBehaviour
         {
             if (!_grounded)
             {
-                _animator.SetTrigger("Landing");
+                _nwAnimator.SetTrigger("Landing");
                 _grounded = true;
             }
             else
             {
-                _animator.SetTrigger("Flying");
+                _nwAnimator.SetTrigger("Flying");
                 _grounded = false;
             }
         }

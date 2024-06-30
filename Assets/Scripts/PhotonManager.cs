@@ -3,7 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
 using UnityEngine.Events;
-
+using ExitGames.Client.Photon;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -66,7 +66,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public void LeaveRoom()
     {
         if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.Destroy(player);
             PhotonNetwork.LeaveRoom();
+        }
+            
     }
 
     public void SendMessage(string nick, string message)
@@ -81,7 +85,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
 // приват
 
-    private void CheckConnectionStatus()
+    public void CheckConnectionStatus()
     {
         if (PhotonNetwork.IsConnected) return;
         Connect();
@@ -131,7 +135,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log($"Отключились от комнаты");
-        PhotonNetwork.Destroy(player);
         PhotonNetwork.LoadLevel("MainMenu");
     }
 
@@ -146,4 +149,40 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         _OnGetMessage.Invoke(nick, message);
     }
 
+    public const byte PlayAnimationEventCode = 1;
+    public const byte StartGrapplingEventCode = 2;
+    public const byte StopGrapplingEventCode = 3;
+    public const byte AttackEventCode = 4;
+    public const byte HealEventCode = 5;
+
+    public static void SendStartEvent(int photonViewID, Vector3 _start_grapple_position, Vector3 _grapple_forward)
+    {
+        object[] content = new object[] { photonViewID, _start_grapple_position, _grapple_forward };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(StartGrapplingEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+    public static void SendStopEvent(int photonViewID)
+    {
+        object[] content = new object[] { photonViewID };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(StopGrapplingEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }   
+    public static void SendPlayAnimationEvent(int photonViewID, string animatorParameter, string parameterType, object parameterValue = null)
+    {
+        object[] content = new object[] { photonViewID, animatorParameter, parameterType, parameterValue };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(PlayAnimationEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+    public static void SendAttackEvent(int photonViewID, int damage, Vector3 force)
+    {
+        object[] content = new object[] { photonViewID, damage, force};
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(AttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+    public static void SendHealEvent(int photonViewID, int value)
+    {
+        object[] content = new object[] { photonViewID, value };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(AttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
 }
