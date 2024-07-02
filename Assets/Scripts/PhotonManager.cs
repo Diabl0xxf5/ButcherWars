@@ -12,6 +12,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public static UnityEvent<List<RoomInfo>> _OnRoomListUpdate = new UnityEvent<List<RoomInfo>>();
     public static UnityEvent<string, string> _OnGetMessage = new UnityEvent<string, string>();
+    public static UnityEvent _OnJoinedLobby = new UnityEvent();
 
     public static PhotonManager instance;
     public static PhotonView _pview;
@@ -38,7 +39,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        CheckConnectionStatus();
+
     }
 
     public void Connect()
@@ -85,10 +86,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
 // приват
 
-    public void CheckConnectionStatus()
+    public bool CheckConnectionStatus()
     {
-        if (PhotonNetwork.IsConnected) return;
-        Connect();
+        if (PhotonNetwork.InLobby) return true;
+        if (!PhotonNetwork.IsConnected) Connect();
+        else if (!PhotonNetwork.InLobby) PhotonNetwork.JoinLobby(); 
+        return false;
     }
 
     private RoomOptions DefaultRoomOptions()
@@ -141,6 +144,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError($"Ошибка подключения к комнате. По причине {returnCode}:{message}");
+    }
+
+    public override void OnJoinedLobby()
+    {
+        _OnJoinedLobby.Invoke();
     }
 
     [PunRPC]

@@ -7,32 +7,56 @@ using UnityEngine.UI;
 
 public class Menu : MonoBehaviour
 {
-    [Header("References")]
-    public GameObject _lobbyPanel;
-    public GameObject _mainMenuPanel;
 
-    [Header("Main menu")]
-    public Button _lobbyB;
+    [Header("Refferences")]
     public Button _fastGameB;
-
-    [Header("Lobby")]
     public Button _connectB;
     public Button _createB;
     public TMP_InputField _roomNameIF;
     public ListItem _roomItemPref;
     public Transform _content;
+    public TextMeshProUGUI _connectingText;
+    public TextMeshProUGUI _roomListText;
+
+    private bool isConnected;
+    private string connectText;
 
     private void Start()
     {
-        _lobbyB.onClick.AddListener(call: (() => { OpenLobby(); }));
+        
         _fastGameB.onClick.AddListener(call: (() => { PhotonManager.instance.JoinRandomRoom(); }));
-
-        _connectB.onClick.AddListener(call: (() => { PhotonManager.instance.JoinRoom(_roomNameIF.text); }));
-        _createB.onClick.AddListener(call: (() => { PhotonManager.instance.CreateRoom(_roomNameIF.text); }));
+        _roomNameIF.onValueChanged.AddListener(call: ((string value) => { RoomNameOnValueChanged(value); }));
+        _connectB.onClick.AddListener(call: (() => { TryConnect(); }));
+        _createB.onClick.AddListener(call: (() => { TryCreate(); }));
 
         PhotonManager._OnRoomListUpdate.AddListener(OnRoomListUpdate);
+        connectText = _connectingText.text;
 
         StartCoroutine(Reconnector());
+        StartCoroutine(ConnectingTextUpdate());
+    }
+
+    public void RoomNameOnValueChanged(string value)
+    {
+        if (value.Equals(" "))
+            _roomNameIF.text = "";
+    }
+
+    public void TryCreate()
+    {
+        if (CheckRoomName()) 
+            PhotonManager.instance.CreateRoom(_roomNameIF.text);
+    }
+
+    public void TryConnect()
+    {
+        if (CheckRoomName())
+            PhotonManager.instance.JoinRoom(_roomNameIF.text);
+    }
+
+    public bool CheckRoomName()
+    {
+        return !_roomNameIF.text.Equals("");
     }
 
     private void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -44,19 +68,35 @@ public class Menu : MonoBehaviour
         }
     }
 
-    private void OpenLobby()
+    private void SwapConnectionStatus()
     {
-        _mainMenuPanel.SetActive(false);
-        _lobbyPanel.SetActive(true);
-        PhotonManager.instance.Connect();
+        isConnected = !isConnected;
+
+        _connectingText.enabled = !isConnected;
+        _roomListText.enabled = isConnected;
     }
 
     IEnumerator Reconnector()
     {
         while (true)
         {
+            if (PhotonManager.instance.CheckConnectionStatus() != isConnected) {
+                SwapConnectionStatus();
+            }; 
             yield return new WaitForSeconds(0.5f);
-            PhotonManager.instance.CheckConnectionStatus();
+        }
+    }
+
+    IEnumerator ConnectingTextUpdate()
+    {
+        string dots = ".";
+
+        while (true)
+        {
+            if (dots.Length > 3) dots = ".";
+            _connectingText.text = connectText + dots;
+            yield return new WaitForSeconds(0.25f);
+            dots += ".";
         }
     }
 
