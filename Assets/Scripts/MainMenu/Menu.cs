@@ -17,9 +17,14 @@ public class Menu : MonoBehaviour
     public Transform _content;
     public TextMeshProUGUI _connectingText;
     public TextMeshProUGUI _roomListText;
+    public Slider _sizeSlider;
+    public Transform _player;
+    public Transform _camera;
 
     private bool isConnected;
     private string connectText;
+    private Vector3 start_player_scale;
+    private Vector3 start_camera_pos;
 
     private void Start()
     {
@@ -28,9 +33,12 @@ public class Menu : MonoBehaviour
         _roomNameIF.onValueChanged.AddListener(call: ((string value) => { RoomNameOnValueChanged(value); }));
         _connectB.onClick.AddListener(call: (() => { TryConnect(); }));
         _createB.onClick.AddListener(call: (() => { TryCreate(); }));
+        _sizeSlider.onValueChanged.AddListener(call: ((float value) => { SizeOnValueChanged(value); }));
 
         PhotonManager._OnRoomListUpdate.AddListener(OnRoomListUpdate);
         connectText = _connectingText.text;
+        start_player_scale = _player.localScale;
+        start_camera_pos = _camera.localPosition;
 
         StartCoroutine(Reconnector());
         StartCoroutine(ConnectingTextUpdate());
@@ -40,6 +48,21 @@ public class Menu : MonoBehaviour
     {
         if (value.Equals(" "))
             _roomNameIF.text = "";
+    }
+
+    public void SizeOnValueChanged(float value)
+    {
+        if(value <= 5)
+        {
+            _player.localScale = start_player_scale * value / 5;
+            _camera.localPosition = start_camera_pos * value / 5;
+        }      
+        else
+        {
+            _player.localScale = start_player_scale * value / 4;
+            _camera.localPosition = start_camera_pos * value / 4;
+        }
+            
     }
 
     public void TryCreate()
