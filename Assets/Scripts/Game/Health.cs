@@ -22,6 +22,8 @@ public class Health : MonoBehaviourPunCallbacks
     public int _hp = 100;
 
 
+    public bool killed;
+
     private int _max;
     PhotonView pv;
     Rigidbody rb;
@@ -102,13 +104,13 @@ public class Health : MonoBehaviourPunCallbacks
         if (_hp == 0)
         {
             _pb.Die();
+            killed = true;
         } else
         {
             _pb.TakeDamage();
         }
 
         Instantiate(_hitEffect, transform);
-
     }
 
     IEnumerator offDamageImage()
@@ -131,6 +133,8 @@ public class Health : MonoBehaviourPunCallbacks
         Instantiate(_healEffect, transform);
 
         if (pv.IsMine) PhotonManager.SendHealEvent(pv.ViewID, value);
+
+        killed = false;
     }
 
 }

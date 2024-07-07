@@ -6,17 +6,12 @@ using UnityEngine.UI;
 
 public class HPBar : MonoBehaviour
 {
+    [Header("References")]
+    public Image _hpBarImage;
+    public Image _hpBarPrevImage;
+    public TextMeshProUGUI _hpText;
+    public bool mainHood;
 
-    [SerializeField]
-    Image _hpBarImage;
-
-    [SerializeField]
-    Image _hpBarPrevImage;
-
-    [SerializeField]
-    TextMeshProUGUI _hpText;
-
-    [SerializeField]
     Transform _camera;
 
     public void UpdateView(int new_hp, int max_hp)
@@ -34,9 +29,14 @@ public class HPBar : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (mainHood) return;
+
         if (_camera)
         {
             transform.LookAt(_camera);
+        } else if (GameManager.instance.playerCameraTransform)
+        {
+            _camera = GameManager.instance.playerCameraTransform;
         }
     }
 

@@ -52,6 +52,11 @@ public class PlayerControl : MonoBehaviour
         _camera.enabled = _pview.IsMine;
         _inGameHood.enabled = _pview.IsMine;
         _HP_Canvas.enabled = !_pview.IsMine;
+
+        if (_pview.IsMine)
+        {
+            GameManager.instance.playerCameraTransform = GetComponentInChildren<Camera>().transform;
+        }
     }
 
     void Update()

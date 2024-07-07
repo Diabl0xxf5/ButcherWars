@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,12 @@ public class Hook : MonoBehaviour
     public Transform hookTransform;
     private Grappling grappling;
     public bool activeHooking;
+    private PlayerBehaviour _pb;
 
     private void Awake()
     {
         grappling = GetComponentInParent<Grappling>();
+        _pb = GetComponentInParent<PlayerBehaviour>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -20,12 +23,14 @@ public class Hook : MonoBehaviour
         
         if (other.tag.Equals("Bot") || other.tag.Equals("Player"))
         {
-            grappling.SetState(HookState.Compression);
-            GameObject botGO = other.gameObject.transform.parent.gameObject;
+            GameObject grappleGO = other.gameObject.transform.parent.gameObject;
+            if (grappleGO.GetComponent<PlayerBehaviour>() == _pb) return;
 
-            botGO.transform.parent = transform;
-            botGO.transform.localPosition = new Vector3(botGO.transform.localPosition.x, -0.2f ,botGO.transform.localPosition.z);
-            botGO.GetComponent<Rigidbody>().isKinematic = true;
+            grappling.SetState(HookState.Compression);
+
+            grappleGO.transform.parent = transform;
+            grappleGO.transform.localPosition = new Vector3(grappleGO.transform.localPosition.x, -0.2f , grappleGO.transform.localPosition.z);
+            grappleGO.GetComponent<Rigidbody>().isKinematic = true;
             activeHooking = false;
         } else if (other.tag.Equals("Pillar"))
         {

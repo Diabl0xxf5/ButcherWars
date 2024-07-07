@@ -245,8 +245,12 @@ public class Grappling : MonoBehaviourPunCallbacks
         float cos_camera = Mathf.Abs(grapple_forward.x / grapple_forward.magnitude);
         drawline = (cos_camera < 0.48f || cos_camera > 0.87f); // от 30 до 60 градусов включается отрисовка по диагонали, иначе линейная
 
-        if (pv.IsMine) PhotonManager.SendStartEvent(pv.ViewID, _start_grapple_position, _grapple_forward);
+        if (pv.IsMine) {
+            Sounds.instance.PlaySound(SoundType.Grapple);
+            PhotonManager.SendStartEvent(pv.ViewID, _start_grapple_position, _grapple_forward);
+        }
     }
+        
 
     void StopGrapple()
     {
@@ -263,7 +267,11 @@ public class Grappling : MonoBehaviourPunCallbacks
 
         player.GetComponent<Rigidbody>().isKinematic = false;
 
-        if (pv.IsMine) PhotonManager.SendStopEvent(pv.ViewID);
+        if (pv.IsMine) {
+            Sounds.instance.StopSound();
+            PhotonManager.SendStopEvent(pv.ViewID);
+        }
+       
     }
    
 }

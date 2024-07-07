@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 284952009}
   - component: {fileID: 284952008}
   - component: {fileID: 284952006}
+  - component: {fileID: 8524961892656760743}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: Untagged
@@ -109,6 +110,14 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
+--- !u!81 &8524961892656760743
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284952005}
+  m_Enabled: 1
 --- !u!1 &222969297591781923
 GameObject:
   m_ObjectHideFlags: 0
@@ -1157,7 +1166,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 6560850998487802910}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -1505,6 +1515,7 @@ MonoBehaviour:
   _hitEffect: {fileID: 904662820145583817, guid: 019faff12646bd8438ea56e8e7861fd8,
     type: 3}
   _hp: 100
+  killed: 0
 --- !u!114 &5382826222601172933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1635,7 +1646,7 @@ MonoBehaviour:
   _hpBarImage: {fileID: 5382826222457318241}
   _hpBarPrevImage: {fileID: 5382826222539064286}
   _hpText: {fileID: 5382826222688336059}
-  _camera: {fileID: 0}
+  mainHood: 1
 --- !u!1 &5382826222688336061
 GameObject:
   m_ObjectHideFlags: 0
@@ -1782,6 +1793,7 @@ GameObject:
   - component: {fileID: 5382826222914180332}
   - component: {fileID: 5382826222914180331}
   - component: {fileID: 5382826222914180330}
+  - component: {fileID: 1043742232189633079}
   m_Layer: 0
   m_Name: AttackArea
   m_TagString: Untagged
@@ -1829,6 +1841,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51b2a187f114dd740b50ae5e2157d4f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1043742232189633079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5382826222914180333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &5382826223020773994
 GameObject:
   m_ObjectHideFlags: 0
@@ -2974,7 +3008,7 @@ MonoBehaviour:
   _hpBarImage: {fileID: 5042121638660890005}
   _hpBarPrevImage: {fileID: 3738426574179094191}
   _hpText: {fileID: 187805379724952664}
-  _camera: {fileID: 0}
+  mainHood: 0
 --- !u!1 &8660812807663600815
 GameObject:
   m_ObjectHideFlags: 0

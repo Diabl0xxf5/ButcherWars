@@ -12,19 +12,30 @@ public class Menu : MonoBehaviour
     public Button _fastGameB;
     public Button _connectB;
     public Button _createB;
+    public Button _lobbyB;
+    public Button _backB;
+    public Button _audioB;
+    public Button _telegramb;
+
     public TMP_InputField _roomNameIF;
     public ListItem _roomItemPref;
     public Transform _content;
     public TextMeshProUGUI _connectingText;
-    public TextMeshProUGUI _roomListText;
+    public TextMeshProUGUI _connectedText;
     public Slider _sizeSlider;
+    public Slider _volumeSlider;
     public Transform _player;
     public Transform _camera;
+    public GameObject _mainMenuPanel;
+    public GameObject _lobbyPanel;
+    public GameObject _xAudio;
+
 
     private bool isConnected;
     private string connectText;
     private Vector3 start_player_scale;
     private Vector3 start_camera_pos;
+    private Dictionary<string, ListItem> _rooms = new Dictionary<string, ListItem>();
 
     private void Start()
     {
@@ -33,7 +44,12 @@ public class Menu : MonoBehaviour
         _roomNameIF.onValueChanged.AddListener(call: ((string value) => { RoomNameOnValueChanged(value); }));
         _connectB.onClick.AddListener(call: (() => { TryConnect(); }));
         _createB.onClick.AddListener(call: (() => { TryCreate(); }));
+        _telegramb.onClick.AddListener(call: (() => { GoToTelegram(); }));
+        _lobbyB.onClick.AddListener(call: (() => { SetActivePanel(_lobbyPanel); }));
+        _backB.onClick.AddListener(call: (() => { SetActivePanel(_mainMenuPanel); }));
         _sizeSlider.onValueChanged.AddListener(call: ((float value) => { SizeOnValueChanged(value); }));
+        _volumeSlider.onValueChanged.AddListener(call: ((float value) => { VolumeOnValueChanged(value); }));
+        _audioB.onClick.AddListener(call: (() => { MuteUnmute(); }));
 
         PhotonManager._OnRoomListUpdate.AddListener(OnRoomListUpdate);
         connectText = _connectingText.text;
@@ -42,6 +58,14 @@ public class Menu : MonoBehaviour
 
         StartCoroutine(Reconnector());
         StartCoroutine(ConnectingTextUpdate());
+    }
+
+    public void SetActivePanel(GameObject activePanel)
+    {
+        _lobbyPanel.SetActive(false);
+        _mainMenuPanel.SetActive(false);
+
+        activePanel.SetActive(true);
     }
 
     public void RoomNameOnValueChanged(string value)
@@ -65,6 +89,25 @@ public class Menu : MonoBehaviour
             
     }
 
+    public void VolumeOnValueChanged(float value)
+    {
+        Sounds.instance.SetVolume(value);
+        _xAudio.SetActive(value == 0f);
+    }
+
+    public void MuteUnmute()
+    {
+        float volume = 0.25f;
+
+        if (_volumeSlider.value > 0)
+        {
+            volume = 0f;
+        }
+
+        _volumeSlider.value = volume;
+        VolumeOnValueChanged(volume);
+    }
+
     public void TryCreate()
     {
         if (CheckRoomName()) 
@@ -84,11 +127,26 @@ public class Menu : MonoBehaviour
 
     private void OnRoomListUpdate(List<RoomInfo> roomList)
     {
+
         foreach (RoomInfo item in roomList)
         {
-            ListItem roomItem = Instantiate(_roomItemPref, _content);
-            if (roomItem) roomItem.SetInfo(item);
+            if (item.RemovedFromList)
+            {
+                if (_rooms.ContainsKey(item.Name))
+                {
+                    Destroy(_rooms[item.Name].gameObject);
+                    _rooms.Remove(item.Name);
+                }
+            } else
+            {
+                ListItem roomItem = Instantiate(_roomItemPref, _content);
+                if (roomItem) {
+                    roomItem.SetInfo(item);
+                    _rooms.Add(item.Name, roomItem);
+                }          
+            }
         }
+
     }
 
     private void SwapConnectionStatus()
@@ -96,7 +154,7 @@ public class Menu : MonoBehaviour
         isConnected = !isConnected;
 
         _connectingText.enabled = !isConnected;
-        _roomListText.enabled = isConnected;
+        _connectedText.enabled = isConnected;
     }
 
     IEnumerator Reconnector()
@@ -121,6 +179,11 @@ public class Menu : MonoBehaviour
             yield return new WaitForSeconds(0.25f);
             dots += ".";
         }
+    }
+
+    public void GoToTelegram()
+    {
+        Application.OpenURL("https://t.me/smyyya_project");
     }
 
 }

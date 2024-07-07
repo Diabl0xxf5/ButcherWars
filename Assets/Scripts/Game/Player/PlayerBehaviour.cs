@@ -16,8 +16,10 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Start()
     {
-        GameManager.instance.FillPlayerBehaviour(this);
-        Respawn();
+        if (_pview.IsMine) {
+            GameManager.instance.FillPlayerBehaviour(this);
+            Respawn();
+        }
     }
 
     private void OnDestroy()
@@ -58,10 +60,12 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void Respawn()
     {
+        transform.parent = null;
         transform.position = _spawnPoint.position;
         transform.rotation = _spawnPoint.rotation;
         GetComponent<Health>().FullHeal();
         Play();
+
         died = false;
     }
 

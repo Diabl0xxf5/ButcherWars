@@ -7,10 +7,7 @@ using YG;
 public class YandexPlugin : MonoBehaviour
 {
 
-    [SerializeField] TextMeshProUGUI _textAction;
     public static YandexPlugin instance;
-
-    int money;
 
     void OnEnable() {
         YandexGame.RewardVideoEvent += Rewarded;
@@ -38,13 +35,6 @@ public class YandexPlugin : MonoBehaviour
         DontDestroyOnLoad(this);
 
     }
-    void Start()
-    {
-        if (YandexGame.SDKEnabled == true)
-        {
-            GetLoad();
-        }
-    }
 
 /* <-- Рекламная движуха --> */
 
@@ -61,17 +51,9 @@ public class YandexPlugin : MonoBehaviour
 
     void Rewarded(int id)
     {
-        // Если ID = 1, то выдаём "+100 монет"
-        if (id == 1)
-        {
-            money += 100;
-            SetAction($"+Монетки. Деньги: {money}");
-        }
-        // Если ID = 2, то выдаём "+оружие".
-        else if (id == 2)
-        {
-            SetAction("+Оружие");
-        }
+        
+        if (id == 1) ;
+        else if (id == 2) ;
 
         SaveData();
 
@@ -82,20 +64,18 @@ public class YandexPlugin : MonoBehaviour
 
     public void SaveData()
     {
-        YandexGame.savesData.money = money;
         YandexGame.SaveProgress();
     }
 
     public void ResetData()
     {
         YandexGame.ResetSaveProgress();
-        SetAction($"+Сброс. Деньги: {money}");
+        Debug.Log($"Сохранение сброшено");
     }
 
     void GetLoad()
     {
-        money = YandexGame.savesData.money;
-        SetAction($"Сохранение загружено. Деньги: {money}");
+        Debug.Log($"Сохранение загружено");
     }
 
 /* <-- Лидерборды --> */
@@ -117,13 +97,10 @@ public class YandexPlugin : MonoBehaviour
     void SuccessPurchased(string id)
     {
         // Ваш код для обработки покупки. Например:
-        if (id == "50")
-            YandexGame.savesData.money += 50;
-        else if (id == "250")
-            YandexGame.savesData.money += 250;
-        else if (id == "1500")
-            YandexGame.savesData.money += 1500;
-
+        if (id == "50");
+        else if (id == "250");
+        else if (id == "1500");
+        
         YandexGame.SaveProgress();
     }
 
@@ -135,8 +112,20 @@ public class YandexPlugin : MonoBehaviour
 
     void SetAction(string strAction)
     {
-        _textAction.text = $"Action: {strAction}";
+        
     }
 
+    public void AddKill()
+    {
+        YandexGame.savesData.kills++;
+        LeaderBoardSaveScore("Kills", YandexGame.savesData.kills);
+        SaveData();
+    }
 
+    public void AddWin()
+    {
+        YandexGame.savesData.wins++;
+        LeaderBoardSaveScore("Wins", YandexGame.savesData.wins);
+        SaveData();
+    }
 }

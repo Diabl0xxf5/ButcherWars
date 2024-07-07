@@ -11,8 +11,9 @@ namespace YG
         public bool promptDone;
 
         // Мои сохранения
-        public int money = 0;                       
         public string newPlayerName = "New player";
+        public int kills = 0;
+        public int wins = 0;
 
         // Вы можете выполнить какие то действия при загрузке сохранений
         public SavesYG()

@@ -13,6 +13,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public static UnityEvent<List<RoomInfo>> _OnRoomListUpdate = new UnityEvent<List<RoomInfo>>();
     public static UnityEvent<string, string> _OnGetMessage = new UnityEvent<string, string>();
     public static UnityEvent _OnJoinedLobby = new UnityEvent();
+    public static UnityEvent<int> _OnKill = new UnityEvent<int>();
 
     public static PhotonManager instance;
     public static PhotonView _pview;
@@ -72,11 +73,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             PhotonNetwork.LeaveRoom();
         }
             
-    }
-
-    public void SendMessage(string nick, string message)
-    {
-        _pview.RPC("onGetMessage", RpcTarget.All, nick, message);
     }
 
     public void SpawnPlayer(GameObject go)
@@ -151,17 +147,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         _OnJoinedLobby.Invoke();
     }
 
-    [PunRPC]
-    private void onGetMessage(string nick, string message)
-    {
-        _OnGetMessage.Invoke(nick, message);
-    }
-
+    
     public const byte PlayAnimationEventCode = 1;
     public const byte StartGrapplingEventCode = 2;
     public const byte StopGrapplingEventCode = 3;
     public const byte AttackEventCode = 4;
     public const byte HealEventCode = 5;
+    public const byte KillEventCode = 6;
 
     public static void SendStartEvent(int photonViewID, Vector3 _start_grapple_position, Vector3 _grapple_forward)
     {
@@ -191,6 +183,27 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         object[] content = new object[] { photonViewID, value };
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-        PhotonNetwork.RaiseEvent(AttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        PhotonNetwork.RaiseEvent(HealEventCode, content, raiseEventOptions, SendOptions.SendReliable);
     }
+
+    [PunRPC]
+    private void OnKill(int teamid)
+    {
+        _OnKill.Invoke(teamid);
+    }
+    public static void SendKillRPC(int teamid)
+    {
+        _pview.RPC("OnKill", RpcTarget.OthersBuffered, teamid);
+    }
+    
+    [PunRPC]
+    private void onGetMessage(string nick, string message)
+    {
+        _OnGetMessage.Invoke(nick, message);
+    }
+    public void SendMessageRPC(string nick, string message)
+    {
+        _pview.RPC("onGetMessage", RpcTarget.All, nick, message);
+    }
+    
 }
