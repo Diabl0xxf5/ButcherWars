@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
 using System.Collections;
 using UnityEngine;
 
@@ -9,22 +10,30 @@ public class PlayerBehaviour : MonoBehaviour
     public NetworkedAnimation _nwAnimator;
     public InGameMenu _inGameMenu;
     public PhotonView _pview;
+    
+    public GameObject _inGameHood;
+    public GameObject _camera;
+    public GameObject _HPBar;
+    public GameObject _InGameMenu;
 
-    public Transform _spawnPoint;
-    public Teams _team;
+    
+
     public bool died;
+    public PhotonTeam _photonTeam;
 
     private void Start()
     {
         if (_pview.IsMine) {
-            GameManager.instance.FillPlayerBehaviour(this);
+            _camera.SetActive(true);
+            _InGameMenu.SetActive(true);
+            _inGameHood.SetActive(true);
+            _photonTeam = PhotonManager._photonTeam;
+            GameManager.instance.playerCameraTransform = _camera.transform;
             Respawn();
+        } else
+        {
+            _HPBar.SetActive(true);
         }
-    }
-
-    private void OnDestroy()
-    {
-        GameManager.instance.ResetSlot(this);
     }
 
     public void Play()
@@ -61,8 +70,11 @@ public class PlayerBehaviour : MonoBehaviour
     public void Respawn()
     {
         transform.parent = null;
-        transform.position = _spawnPoint.position;
-        transform.rotation = _spawnPoint.rotation;
+
+        Transform spawn_point = GameManager.instance.GetSpawnPoint();
+
+        transform.position = spawn_point.position;
+        transform.eulerAngles = spawn_point.eulerAngles;
         GetComponent<Health>().FullHeal();
         Play();
 

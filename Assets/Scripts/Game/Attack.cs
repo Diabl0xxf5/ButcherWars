@@ -11,7 +11,7 @@ public class Attack : MonoBehaviour
     int pushForce;
     Collider _attackCollider;
     PhotonView _pv;
-    Teams _team;
+    PlayerBehaviour _pb;
 
     private void Awake()
     {
@@ -21,7 +21,7 @@ public class Attack : MonoBehaviour
 
     private void Start()
     {
-        _team = GetComponentInParent<PlayerBehaviour>()._team;
+        _pb = GetComponentInParent<PlayerBehaviour>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -36,7 +36,7 @@ public class Attack : MonoBehaviour
 
             PlayerBehaviour pb = other.GetComponentInParent<PlayerBehaviour>();
 
-            if (pb._team == _team) return;
+            if (pb._photonTeam == _pb._photonTeam) return;
 
             Vector3 forceVector = (other.transform.position - transform.position) * pushForce;
             health.SendAttackEvent(damage, forceVector);
@@ -44,8 +44,8 @@ public class Attack : MonoBehaviour
             if (health.killed)
             {
                 YandexPlugin.instance.AddKill();
-                GameManager.instance.PlayerKill(_team);
-                PhotonManager.SendKillRPC((int)_team);
+                GameManager.instance.PlayerKill(_pb._photonTeam);
+                PhotonManager.SendKillRPC(_pb._photonTeam.Code);
             }
         }
         

@@ -1,13 +1,12 @@
 {
-  "idSave": 5,
-  "isFirstSession": false,
-  "language": "ru",
-  "promptDone": false,
-  "money": 0,
-  "newPlayerName": "New player",
-  "openLevels": [
-    false,
-    true,
-    false
-  ]
+    "idSave": 1130,
+    "isFirstSession": false,
+    "language": "en",
+    "promptDone": false,
+    "newPlayerName": "New player",
+    "kills": 2,
+    "wins": 1,
+    "loses": 0,
+    "volume": 0.0,
+    "sensetive": 2.8778083324432375
 }

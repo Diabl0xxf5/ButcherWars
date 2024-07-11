@@ -1,0 +1,2 @@
+Build path: E:/Unity/Builds/ButcherWars/WEBGL_Build
+Build number: 2

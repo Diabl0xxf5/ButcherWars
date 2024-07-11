@@ -2,6 +2,7 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using YG;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -14,10 +15,7 @@ public class PlayerControl : MonoBehaviour
     public Attack _attack;
     public Grappling _grappling;
     public PhotonView _pview;
-    public Camera _camera;
-    public Canvas _inGameHood;
-    public Canvas _HP_Canvas;
-    public InGameMenu _inGameMenu;
+    
 
     [Header("Settings")]
     public float _rotationSpeed;
@@ -32,15 +30,21 @@ public class PlayerControl : MonoBehaviour
     public KeyCode _AttackKey;
     public KeyCode _GrappleKey;
     public KeyCode _JumpKey;
-    public KeyCode _MenuButton;
 
     private Vector3 _moveVector;
-    private Vector3 _prevMousePosition;
     private float _eulerY;
     private float _eulerX;
     private bool _grounded;
     private float _freezeControlTimer;
     private bool _running;
+
+    public static PlayerControl instance;
+
+
+    private void OnEnable()
+    {
+        _eulerY = transform.eulerAngles.y;
+    }
 
     void Awake()
     {
@@ -49,14 +53,8 @@ public class PlayerControl : MonoBehaviour
 
     void Start()
     {
-        _camera.enabled = _pview.IsMine;
-        _inGameHood.enabled = _pview.IsMine;
-        _HP_Canvas.enabled = !_pview.IsMine;
-
-        if (_pview.IsMine)
-        {
-            GameManager.instance.playerCameraTransform = GetComponentInChildren<Camera>().transform;
-        }
+        _mouseSensetive = YandexGame.savesData.sensetive;
+        if (_pview.IsMine) instance = this;
     }
 
     void Update()
@@ -66,7 +64,6 @@ public class PlayerControl : MonoBehaviour
         if (_freezeControlTimer > 0 || Time.deltaTime == 0)
         {
             _freezeControlTimer -= Time.deltaTime; 
-            _prevMousePosition = Input.mousePosition;
             return;
         }
 
@@ -77,8 +74,6 @@ public class PlayerControl : MonoBehaviour
         StateAttack();
         StateGrappling();
         StateJump();
-
-        if (InputButtonCheck(_MenuButton)) _inGameMenu.ShowHide();
 
     }
 
@@ -178,14 +173,16 @@ public class PlayerControl : MonoBehaviour
     }
     private void CameraRotate()
     {
-        float deltaX = (Input.mousePosition.x - _prevMousePosition.x) * _mouseSensetive;
-        float deltaY = (_prevMousePosition.y - Input.mousePosition.y) * _mouseSensetive;
-        _prevMousePosition = Input.mousePosition;
+
+        float deltaX = Input.GetAxis("Mouse X") * _mouseSensetive;
+        float deltaY = -Input.GetAxis("Mouse Y") * _mouseSensetive;
+
         _eulerY += deltaX;
         _eulerX = Mathf.Clamp(_eulerX + deltaY, -35f, 25f);
         transform.eulerAngles = new Vector3(0, _eulerY, 0);
         _cameraCenter.localEulerAngles = new Vector3(_eulerX, 0f, 0f);
     }
+
     private void GroundCheck()
     {
         if (_grounded != _groundChecker.Grounded())

@@ -16,6 +16,8 @@ public class HPBar : MonoBehaviour
 
     public void UpdateView(int new_hp, int max_hp)
     {
+        if (!gameObject.activeInHierarchy) return;
+
         _hpBarImage.fillAmount = (float)new_hp / max_hp;
         _hpText.text = $"{new_hp} / {max_hp}";
         StartCoroutine(UpdateViewLate());
@@ -34,8 +36,7 @@ public class HPBar : MonoBehaviour
         if (_camera)
         {
             transform.LookAt(_camera);
-        } else if (GameManager.instance.playerCameraTransform)
-        {
+        } else if (GameManager.instance != null && GameManager.instance.playerCameraTransform != null) {
             _camera = GameManager.instance.playerCameraTransform;
         }
     }

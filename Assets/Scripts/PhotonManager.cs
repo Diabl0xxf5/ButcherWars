@@ -4,6 +4,8 @@ using Photon.Realtime;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using ExitGames.Client.Photon;
+using Photon.Pun.UtilityScripts;
+using System.Collections;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -13,10 +15,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public static UnityEvent<List<RoomInfo>> _OnRoomListUpdate = new UnityEvent<List<RoomInfo>>();
     public static UnityEvent<string, string> _OnGetMessage = new UnityEvent<string, string>();
     public static UnityEvent _OnJoinedLobby = new UnityEvent();
-    public static UnityEvent<int> _OnKill = new UnityEvent<int>();
+    public static UnityEvent<byte> _OnKill = new UnityEvent<byte>();
 
     public static PhotonManager instance;
     public static PhotonView _pview;
+    public static PhotonTeam _photonTeam;
 
     private GameObject player;
 
@@ -69,15 +72,49 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom)
         {
+            if (PhotonNetwork.LocalPlayer.LeaveCurrentTeam())
+            {
+                _photonTeam = null;
+                Debug.Log($"Отключились от команды");
+            }
             PhotonNetwork.Destroy(player);
             PhotonNetwork.LeaveRoom();
         }
             
     }
 
-    public void SpawnPlayer(GameObject go)
+    public GameObject SpawnPlayer(GameObject go)
     {
-        player = PhotonNetwork.Instantiate(go.name, Vector3.zero, Quaternion.identity);
+        return player = PhotonNetwork.Instantiate(go.name, Vector3.zero, Quaternion.identity);
+    }
+
+    public bool JoinTeam()
+    {
+
+        if (!PhotonTeamsManager.teams_loaded) return false;
+
+        PhotonTeam[] pteams = PhotonTeamsManager.Instance.GetAvailableTeams();
+
+        _photonTeam = pteams[0];
+        int player_count = PhotonTeamsManager.Instance.GetTeamMembersCount(_photonTeam);
+        foreach (var pteam in pteams)
+        {
+            int cur_count = PhotonTeamsManager.Instance.GetTeamMembersCount(pteam);
+
+            if (player_count > cur_count)
+            {
+                _photonTeam = pteam;
+                player_count = cur_count;
+            }
+        }
+
+        if (PhotonNetwork.LocalPlayer.JoinTeam(_photonTeam))
+        {
+            Debug.Log($"Подключились к команде({_photonTeam.Name})");
+            return true;
+        }
+
+        return false;
     }
 
 // приват
@@ -85,8 +122,27 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public bool CheckConnectionStatus()
     {
         if (PhotonNetwork.InLobby) return true;
-        if (!PhotonNetwork.IsConnected) Connect();
-        else if (!PhotonNetwork.InLobby) PhotonNetwork.JoinLobby(); 
+
+        switch (PhotonNetwork.NetworkClientState)
+        {
+            case ClientState.PeerCreated:
+            case ClientState.Disconnected:
+                Connect();
+                break;
+            case ClientState.ConnectedToMasterServer:
+                PhotonNetwork.JoinLobby();
+                break;
+            case ClientState.JoiningLobby:
+            case ClientState.ConnectingToNameServer:
+            case ClientState.Authenticating:
+            case ClientState.ConnectingToMasterServer:
+            case ClientState.Joining:
+                break;
+            default:
+                Connect();
+                break;
+        }
+
         return false;
     }
 
@@ -102,7 +158,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log($"Вы подключены к {PhotonNetwork.CloudRegion}");
-        if (!PhotonNetwork.InLobby) PhotonNetwork.JoinLobby();
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -187,11 +242,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void OnKill(int teamid)
+    private void OnKill(byte teamid)
     {
         _OnKill.Invoke(teamid);
     }
-    public static void SendKillRPC(int teamid)
+    public static void SendKillRPC(byte teamid)
     {
         _pview.RPC("OnKill", RpcTarget.OthersBuffered, teamid);
     }
@@ -205,5 +260,5 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         _pview.RPC("onGetMessage", RpcTarget.All, nick, message);
     }
-    
+
 }

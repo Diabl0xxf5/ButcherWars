@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -64,7 +65,13 @@ public class YandexPlugin : MonoBehaviour
 
     public void SaveData()
     {
-        YandexGame.SaveProgress();
+        try
+        {
+            YandexGame.SaveProgress();
+        }
+        catch(Exception ex) {
+
+        }
     }
 
     public void ResetData()
@@ -128,4 +135,24 @@ public class YandexPlugin : MonoBehaviour
         LeaderBoardSaveScore("Wins", YandexGame.savesData.wins);
         SaveData();
     }
+
+    public void AddLose()
+    {
+        YandexGame.savesData.loses++;
+        LeaderBoardSaveScore("Loses", YandexGame.savesData.loses);
+        SaveData();
+    }
+
+    public void SetVolume(float v)
+    {
+        YandexGame.savesData.volume = v;
+        SaveData();
+    }
+
+    public void SetSensetive(float s)
+    {
+        YandexGame.savesData.sensetive = s;
+        SaveData();
+    }
+
 }

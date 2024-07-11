@@ -65,6 +65,7 @@ namespace Photon.Pun.UtilityScripts
 
         /// <summary>Defines the player custom property name to use for team affinity of "this" player.</summary>
         public const string TeamPlayerProp = "_pt";
+        public static bool teams_loaded = false;
 
         public static event Action<Player, PhotonTeam> PlayerJoinedTeam;
         public static event Action<Player, PhotonTeam> PlayerLeftTeam;
@@ -136,11 +137,13 @@ namespace Photon.Pun.UtilityScripts
         void IMatchmakingCallbacks.OnJoinedRoom()
         {
             this.UpdateTeams();
+            teams_loaded = true;
         }
 
         void IMatchmakingCallbacks.OnLeftRoom()
         {
             this.ClearTeams();
+            teams_loaded = false;
         }
 
         void IInRoomCallbacks.OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)

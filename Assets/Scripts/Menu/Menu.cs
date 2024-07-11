@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using YG;
 
 public class Menu : MonoBehaviour
 {
@@ -13,8 +14,7 @@ public class Menu : MonoBehaviour
     public Button _connectB;
     public Button _createB;
     public Button _lobbyB;
-    public Button _backB;
-    public Button _audioB;
+    public Button _backB; 
     public Button _telegramb;
 
     public TMP_InputField _roomNameIF;
@@ -23,12 +23,10 @@ public class Menu : MonoBehaviour
     public TextMeshProUGUI _connectingText;
     public TextMeshProUGUI _connectedText;
     public Slider _sizeSlider;
-    public Slider _volumeSlider;
     public Transform _player;
     public Transform _camera;
     public GameObject _mainMenuPanel;
     public GameObject _lobbyPanel;
-    public GameObject _xAudio;
 
 
     private bool isConnected;
@@ -36,6 +34,10 @@ public class Menu : MonoBehaviour
     private Vector3 start_player_scale;
     private Vector3 start_camera_pos;
     private Dictionary<string, ListItem> _rooms = new Dictionary<string, ListItem>();
+
+    
+
+    
 
     private void Start()
     {
@@ -48,13 +50,14 @@ public class Menu : MonoBehaviour
         _lobbyB.onClick.AddListener(call: (() => { SetActivePanel(_lobbyPanel); }));
         _backB.onClick.AddListener(call: (() => { SetActivePanel(_mainMenuPanel); }));
         _sizeSlider.onValueChanged.AddListener(call: ((float value) => { SizeOnValueChanged(value); }));
-        _volumeSlider.onValueChanged.AddListener(call: ((float value) => { VolumeOnValueChanged(value); }));
-        _audioB.onClick.AddListener(call: (() => { MuteUnmute(); }));
+        
 
         PhotonManager._OnRoomListUpdate.AddListener(OnRoomListUpdate);
         connectText = _connectingText.text;
         start_player_scale = _player.localScale;
         start_camera_pos = _camera.localPosition;
+
+        MyCursor.ShowCursor();
 
         StartCoroutine(Reconnector());
         StartCoroutine(ConnectingTextUpdate());
@@ -89,24 +92,7 @@ public class Menu : MonoBehaviour
             
     }
 
-    public void VolumeOnValueChanged(float value)
-    {
-        Sounds.instance.SetVolume(value);
-        _xAudio.SetActive(value == 0f);
-    }
-
-    public void MuteUnmute()
-    {
-        float volume = 0.25f;
-
-        if (_volumeSlider.value > 0)
-        {
-            volume = 0f;
-        }
-
-        _volumeSlider.value = volume;
-        VolumeOnValueChanged(volume);
-    }
+    
 
     public void TryCreate()
     {

@@ -1,5 +1,7 @@
 using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,17 +16,17 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
 
     [Header("References")]
-    public List<Transform> GreenSpawnPoints;
+    public List<Transform> BlueSpawnPoints;
     public List<Transform> RedSpawnPoints;
     public GameObject _playerPrefab;
+    public int KillCup;
 
-    public int GreenKills;
+    public int BlueKills;
     public int RedKills;
     public Transform playerCameraTransform;
+    public GameObject playerGO;
 
     public static GameManager instance;
-
-    public Teams _team;
 
     void Awake()
     {
@@ -40,84 +42,63 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         PhotonManager._OnKill.AddListener(PlayerKill);
+        MyCursor.HideCursor();
+        StartCoroutine(LoadPlayer());
     }
 
-    private void Start()
+    IEnumerator LoadPlayer()
     {
-        Spawn();
-    }
-
-    public void Spawn()
-    {
-        if (PhotonManager.instance)
-            PhotonManager.instance.SpawnPlayer(_playerPrefab);
-        else
-            Instantiate(_playerPrefab);
-    }
-
-    public void FillPlayerBehaviour(PlayerBehaviour _pb)
-    {
-        int pc = PhotonNetwork.CurrentRoom.PlayerCount;
-        
-        if (pc % 2 == 0)
+        while (!PhotonManager.instance.JoinTeam())
         {
-            _pb._spawnPoint = GreenSpawnPoints[0];
-            _pb._team = Teams.Green;
-            _team = Teams.Green;
-            GreenSpawnPoints.RemoveAt(0);
-        } else
-        {
-            _pb._spawnPoint = RedSpawnPoints[0];
-            _pb._team = Teams.Red;
-            _team = Teams.Red;
-            RedSpawnPoints.RemoveAt(0);
-        }      
-    }
-
-    public void ResetSlot(PlayerBehaviour _pb)
-    {
-        if (_pb._team == Teams.Green)
-        {
-            GreenSpawnPoints.Add(_pb._spawnPoint);
-        } else if (_pb._team == Teams.Red)
-        {
-            RedSpawnPoints.Add(_pb._spawnPoint);
+            yield return new WaitForSeconds(0.5f);
         }
+
+        playerGO = PhotonManager.instance.SpawnPlayer(_playerPrefab);
     }
 
-    public void PlayerKill(Teams t)
+    public Transform GetSpawnPoint()
     {
-        if (t == Teams.Green)
-            GreenKills++;
-        else if (t == Teams.Red)
+        if (PhotonManager._photonTeam.Name == "Blue")
+            return BlueSpawnPoints[Random.Range(0, 3)];
+        else if (PhotonManager._photonTeam.Name == "Red")
+            return RedSpawnPoints[Random.Range(0, 3)];
+
+        return null;
+    }
+
+
+    public void PlayerKill(PhotonTeam t)
+    {
+        if (t.Name == "Blue")
+            BlueKills++;
+        else if (t.Name == "Red")
             RedKills++;
 
-        if (GreenKills >= 30)
+        if (BlueKills >= KillCup || RedKills >= KillCup)
         {
-            TeamWin(Teams.Green);
-        }
-        else if (RedKills >= 30)
-        {
-            TeamWin(Teams.Red);
+            TeamWin(t);
         }
     }
 
-    public void PlayerKill(int t_id)
+    public void PlayerKill(byte t_id)
     {
-        PlayerKill((Teams)t_id);
+        PhotonTeam out_t;
+        PhotonTeamsManager.Instance.TryGetTeamByCode(t_id, out out_t);
+        PlayerKill(out_t);
     }
 
-    public void TeamWin(Teams t)
+    public void TeamWin(PhotonTeam t)
     {
-        if (t == _team)
+        if (PhotonManager._photonTeam == t)
         {
-            //win
             YandexPlugin.instance.AddWin();
         }
         else
         {
-            //lose
+            YandexPlugin.instance.AddLose();
         }
+
+        PhotonManager.instance.LeaveRoom();
     }
 
 }

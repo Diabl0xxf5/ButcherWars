@@ -13,6 +13,9 @@ public class InGameMenu : MonoBehaviour
     public Button _leaveB;
     public Button _respawnB;
 
+    [Header("Input")]
+    public KeyCode _MenuButton;
+
     public void ShowHide()
     {
         if (_canvas.enabled)
@@ -27,6 +30,8 @@ public class InGameMenu : MonoBehaviour
         _respawnB.onClick.AddListener(call: (() => { Respawn(); }));
         _respawnB.gameObject.SetActive(_pb.died);
         _canvas.enabled = true;
+        MyCursor.ShowCursor();
+        if (PlayerControl.instance) PlayerControl.instance.enabled = false;
     }
 
     public void Hide()
@@ -34,11 +39,18 @@ public class InGameMenu : MonoBehaviour
         _leaveB.onClick.RemoveAllListeners();
         _respawnB.onClick.RemoveAllListeners();
         _canvas.enabled = false;
+        MyCursor.HideCursor();
+        if (PlayerControl.instance) PlayerControl.instance.enabled = true;
     }
 
-    private void Awake()
+    private void Update()
     {
-        
+        if (InputButtonCheck(_MenuButton)) { ShowHide(); }
+    }
+
+    private bool InputButtonCheck(KeyCode kc)
+    {
+        return Input.GetKeyDown(kc);
     }
 
     void LeaveRoom()

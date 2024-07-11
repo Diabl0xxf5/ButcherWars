@@ -14,6 +14,9 @@ namespace YG
         public string newPlayerName = "New player";
         public int kills = 0;
         public int wins = 0;
+        public int loses = 0;
+        public float volume = 0.2f;
+        public float sensetive = 1.75f;
 
         // Вы можете выполнить какие то действия при загрузке сохранений
         public SavesYG()
