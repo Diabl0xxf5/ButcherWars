@@ -19,7 +19,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public static PhotonManager instance;
     public static PhotonView _pview;
-    public static PhotonTeam _photonTeam;
+    public static PhotonTeam _photonTeam = null;
 
     private GameObject player;
 
@@ -72,11 +72,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom)
         {
-            if (PhotonNetwork.LocalPlayer.LeaveCurrentTeam())
-            {
-                _photonTeam = null;
-                Debug.Log($"Отключились от команды");
-            }
             PhotonNetwork.Destroy(player);
             PhotonNetwork.LeaveRoom();
         }
@@ -92,8 +87,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
 
         if (!PhotonTeamsManager.teams_loaded) return false;
-
+        PhotonTeamsManager.Instance.MeUpdateTeams();
         PhotonTeam[] pteams = PhotonTeamsManager.Instance.GetAvailableTeams();
+
+        if (_photonTeam != null)
+            PhotonNetwork.LocalPlayer.LeaveCurrentTeam();
 
         _photonTeam = pteams[0];
         int player_count = PhotonTeamsManager.Instance.GetTeamMembersCount(_photonTeam);
@@ -108,6 +106,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
 
+        
         if (PhotonNetwork.LocalPlayer.JoinTeam(_photonTeam))
         {
             Debug.Log($"Подключились к команде({_photonTeam.Name})");
@@ -188,6 +187,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
+        if (PhotonNetwork.LocalPlayer.LeaveCurrentTeam())
+        {
+            _photonTeam = null;
+            Debug.Log($"Отключились от команды");
+        }
         Debug.Log($"Отключились от комнаты");
         PhotonNetwork.LoadLevel("MainMenu");
     }
@@ -209,6 +213,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public const byte AttackEventCode = 4;
     public const byte HealEventCode = 5;
     public const byte KillEventCode = 6;
+    public const byte SetTeamEventCode = 6;
 
     public static void SendStartEvent(int photonViewID, Vector3 _start_grapple_position, Vector3 _grapple_forward)
     {
@@ -239,6 +244,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         object[] content = new object[] { photonViewID, value };
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
         PhotonNetwork.RaiseEvent(HealEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+
+    public static void SendSetTeamEvent(int photonViewID, byte team_id)
+    {
+        object[] content = new object[] { photonViewID, team_id };
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(SetTeamEventCode, content, raiseEventOptions, SendOptions.SendReliable);
     }
 
     [PunRPC]

@@ -27,6 +27,7 @@ public class Health : MonoBehaviourPunCallbacks
     private int _max;
     PhotonView pv;
     Rigidbody rb;
+    
 
     public override void OnEnable()
     {

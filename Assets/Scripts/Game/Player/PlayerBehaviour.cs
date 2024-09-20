@@ -1,29 +1,28 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using System.Collections;
 using UnityEngine;
 
-public class PlayerBehaviour : MonoBehaviour
+public class PlayerBehaviour : MonoBehaviourPunCallbacks
 {
     [Header("References")]
     public PlayerControl _playerControl;
     public NetworkedAnimation _nwAnimator;
     public InGameMenu _inGameMenu;
-    public PhotonView _pview;
-    
+    public TeamText _tt;
+
     public GameObject _inGameHood;
     public GameObject _camera;
     public GameObject _HPBar;
     public GameObject _InGameMenu;
-
-    
 
     public bool died;
     public PhotonTeam _photonTeam;
 
     private void Start()
     {
-        if (_pview.IsMine) {
+        if (this.photonView.IsMine) {
             _camera.SetActive(true);
             _InGameMenu.SetActive(true);
             _inGameHood.SetActive(true);
@@ -33,6 +32,8 @@ public class PlayerBehaviour : MonoBehaviour
         } else
         {
             _HPBar.SetActive(true);
+            _photonTeam = this.photonView.Controller.GetPhotonTeam();
+            _tt.SetPhotonTeam(_photonTeam);
         }
     }
 
@@ -64,7 +65,7 @@ public class PlayerBehaviour : MonoBehaviour
         _nwAnimator.SetTrigger("Die");
         Stop();
         died = true;
-        if (_pview.IsMine) _inGameMenu.Show();
+        if (this.photonView.IsMine) _inGameMenu.Show();
     }
 
     public void Respawn()

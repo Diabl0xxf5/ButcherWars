@@ -6,12 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Teams
-{
-    Green,
-    Red
-}
-
 public class GameManager : MonoBehaviourPunCallbacks
 {
 

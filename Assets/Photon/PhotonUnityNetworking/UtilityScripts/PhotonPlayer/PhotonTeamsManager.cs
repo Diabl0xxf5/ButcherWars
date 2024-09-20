@@ -146,6 +146,11 @@ namespace Photon.Pun.UtilityScripts
             teams_loaded = false;
         }
 
+        public void MeUpdateTeams()
+        {
+            this.UpdateTeams();
+        }
+
         void IInRoomCallbacks.OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
         {
             object temp;

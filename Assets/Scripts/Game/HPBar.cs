@@ -10,9 +10,7 @@ public class HPBar : MonoBehaviour
     public Image _hpBarImage;
     public Image _hpBarPrevImage;
     public TextMeshProUGUI _hpText;
-    public bool mainHood;
-
-    Transform _camera;
+    
 
     public void UpdateView(int new_hp, int max_hp)
     {
@@ -27,18 +25,6 @@ public class HPBar : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         _hpBarPrevImage.fillAmount = _hpBarImage.fillAmount;
-    }
-
-    void FixedUpdate()
-    {
-        if (mainHood) return;
-
-        if (_camera)
-        {
-            transform.LookAt(_camera);
-        } else if (GameManager.instance != null && GameManager.instance.playerCameraTransform != null) {
-            _camera = GameManager.instance.playerCameraTransform;
-        }
     }
 
 }
